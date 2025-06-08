@@ -6,4 +6,6 @@ import dash_bootstrap_components as dbc
 
 data = pd.read_csv('data.csv')
 
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 
