@@ -153,3 +153,37 @@ def update_plots(selected_genres, popularity_range, selected_feature):
     return scatter_fig, hist_fig, box_fig, bar_fig
 
 
+@app.callback(
+    Output('track-details', 'children'),
+    Input('scatter-plot', 'clickData'),
+    State('genre-filter', 'value'),
+    State('popularity-slider', 'value')
+)
+def display_track_details(clickData, selected_genres, popularity_range):
+    if clickData is None:
+        return "Click on a point in the scatter plot to see track details."
+
+    point = clickData['points'][0]
+    track_name = point['customdata'][0]
+    artist_name = point['customdata'][1]
+
+    track_data = data[
+        (data['track_name'] == track_name) &
+        (data['artist_name'] == artist_name) &
+        (data['genre'].isin(selected_genres)) &
+        (data['popularity'].between(popularity_range[0], popularity_range[1]))
+        ]
+
+    if not track_data.empty:
+        track = track_data.iloc[0]
+        details = [
+            html.P(f"Track: {track['track_name']}"),
+            html.P(f"Artist: {track['artist_name']}"),
+            html.P(f"Genre: {track['genre']}"),
+            html.P(f"Popularity: {track['popularity']}"),
+            html.P(f"Danceability: {track['danceability']:.2f}"),
+            html.P(f"Energy: {track['energy']:.2f}"),
+            html.P(f"Valence: {track['valence']:.2f}")
+        ]
+        return details
+    return "No details available for this track."
