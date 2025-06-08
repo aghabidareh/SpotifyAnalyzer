@@ -205,4 +205,4 @@ def download_data(n_clicks, selected_genres, popularity_range):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
