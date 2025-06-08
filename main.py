@@ -91,3 +91,65 @@ app.layout = dbc.Container([
         ], md=12)
     ])
 ], fluid=True)
+
+
+@app.callback(
+    [
+        Output('scatter-plot', 'figure'),
+        Output('histogram', 'figure'),
+        Output('box-plot', 'figure'),
+        Output('bar-plot', 'figure')
+    ],
+    [
+        Input('genre-filter', 'value'),
+        Input('popularity-slider', 'value'),
+        Input('feature-dropdown', 'value')
+    ]
+)
+def update_plots(selected_genres, popularity_range, selected_feature):
+    filtered_data = data[
+        (data['genre'].isin(selected_genres)) &
+        (data['popularity'].between(popularity_range[0], popularity_range[1]))
+        ]
+
+    scatter_fig = px.scatter(
+        filtered_data,
+        x=selected_feature,
+        y='popularity',
+        color='genre',
+        hover_data=['track_name', 'artist_name'],
+        title=f'{selected_feature.capitalize()} vs Popularity'
+    )
+    scatter_fig.update_layout(transition_duration=500)
+
+    hist_fig = px.histogram(
+        filtered_data,
+        x=selected_feature,
+        color='genre',
+        title=f'Distribution of {selected_feature.capitalize()}',
+        nbins=30
+    )
+    hist_fig.update_layout(transition_duration=500)
+
+    box_fig = px.box(
+        filtered_data,
+        x='genre',
+        y=selected_feature,
+        color='genre',
+        title=f'{selected_feature.capitalize()} by Genre'
+    )
+    box_fig.update_layout(transition_duration=500)
+
+    top_artists = filtered_data.groupby('artist_name')['popularity'].mean().sort_values(ascending=False).head(10)
+    bar_fig = px.bar(
+        x=top_artists.values,
+        y=top_artists.index,
+        orientation='h',
+        title='Top 10 Artists by Average Popularity',
+        labels={'x': 'Average Popularity', 'y': 'Artist'}
+    )
+    bar_fig.update_layout(transition_duration=500)
+
+    return scatter_fig, hist_fig, box_fig, bar_fig
+
+
