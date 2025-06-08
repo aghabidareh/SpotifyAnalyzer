@@ -187,3 +187,18 @@ def display_track_details(clickData, selected_genres, popularity_range):
         ]
         return details
     return "No details available for this track."
+
+@app.callback(
+    Output('download-data', 'data'),
+    Input('download-btn', 'n_clicks'),
+    State('genre-filter', 'value'),
+    State('popularity-slider', 'value'),
+    prevent_initial_call=True
+)
+def download_data(n_clicks, selected_genres, popularity_range):
+    filtered_data = data[
+        (data['genre'].isin(selected_genres)) &
+        (data['popularity'].between(popularity_range[0], popularity_range[1]))
+    ]
+    return dcc.send_data_frame(filtered_data.to_csv, 'filtered_spotify_data.csv')
+
